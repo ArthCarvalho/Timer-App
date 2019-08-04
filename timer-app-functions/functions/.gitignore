@@ -1,0 +1,3 @@
+node_modules/
+# project specific config.js file
+config.js
