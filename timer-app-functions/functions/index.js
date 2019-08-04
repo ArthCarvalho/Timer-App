@@ -1,17 +1,18 @@
 const functions = require('firebase-functions');
-const admin = require('firebase-admin');
-
-admin.initializeApp();
-
-const db = admin.firestore();
 
 const express = require('express');
 const app = express();
+
+const fbAuth = require('./firebase/fbAuth');
+
+const { db } = require('./firebase/admin')
 
 const { config } = require('./config');
 
 const firebase = require('firebase');
 firebase.initializeApp(config);
+
+// Firebase Auth
 
 // Utility Functions
 // Validators
