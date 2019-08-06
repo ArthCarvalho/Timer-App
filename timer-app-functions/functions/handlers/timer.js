@@ -29,13 +29,14 @@ exports.getTimerSingleEntry = (request, response) => {
 // Get a list of timer entries
 // Query:
 // ?limit - Maximum number of entries to return (default: 10)
-// TODO:
 // ?workspace - Filter by workspace id
 // ?project - Filter by project id
-// ?after - Get entries only from after specified date
-// ?before - Get entries only from before specified date
+// ?before - Get entries only from after specified date
+// ?after - Get entries only from before specified date
 exports.getTimerEntries = (request, response) => {
   let limit = request.query.limit;
+  let beforeDate = request.query.before;
+  let afterDate = request.query.after;
   if(!limit) {
     // No parameter defaults to 10
     limit = 10;
@@ -50,14 +51,25 @@ exports.getTimerEntries = (request, response) => {
   // Other options: todo
 
   let query = db.collection('timer-entries').where('userId', '==', request.user.uid);
-
+  // Filter by workspace
   if(request.query.workspace) {
     console.log('getTimerEntries: filter by workspace ID', request.query.workspace);
     query = query.where('workspaceId', '==', request.query.workspace);
   }
+  // Filter by project
   if(request.query.project) {
     console.log('getTimerEntries: filter by project ID', request.query.project);
     query = query.where('projectId', '==', request.query.project);
+  }
+  // Filter by starting date
+  if(beforeDate) {
+    console.log('getTimerEntries: filter by dates before', beforeDate);
+    query = query.where('createdAt', '<=', beforeDate);
+  }
+  // Filter by ending date
+  if(afterDate) {
+    console.log('getTimerEntries: filter by dates after', afterDate);
+    query = query.where('createdAt', '>=', afterDate);
   }
   query.orderBy('createdAt', 'desc')
   .limit(limit)

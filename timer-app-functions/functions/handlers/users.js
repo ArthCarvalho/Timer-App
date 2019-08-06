@@ -72,6 +72,7 @@ exports.login = (request, response) => {
     password: request.body.password
   };
 
+  let refreshToken;
   const { errors, valid } = validateLoginData(user);
 
   if (!valid) return response.status(400).json(errors);
@@ -80,10 +81,11 @@ exports.login = (request, response) => {
     .auth()
     .signInWithEmailAndPassword(user.email, user.password)
     .then(data => {
+      refreshToken = data.user.refreshToken;
       return data.user.getIdToken();
     })
     .then(token => {
-      return response.json({ token });
+      return response.json({ token, refreshToken });
     })
     .catch(error => {
       console.error(error);

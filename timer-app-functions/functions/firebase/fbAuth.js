@@ -13,6 +13,7 @@ module.exports = (request, response, next) => {
   admin.auth().verifyIdToken(idToken)
   .then(decodedToken => {
     request.user = decodedToken;
+    console.log(decodedToken);
     return db.doc(`/users/${request.user.uid}`).get();
   })
   .then(doc => {
