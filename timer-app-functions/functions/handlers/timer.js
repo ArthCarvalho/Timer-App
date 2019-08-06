@@ -22,7 +22,7 @@ exports.getTimerSingleEntry = (request, response) => {
   })
   .catch(error => {
     console.error(error);
-    response.status(500).json({ error });
+    response.status(500).json(error);
   })
 };
 
@@ -49,9 +49,17 @@ exports.getTimerEntries = (request, response) => {
   console.log('getTimerEntries: limit=',limit);
   // Other options: todo
 
-  db.collection('timer-entries')
-  .where('userId', '==', request.user.uid)
-  .orderBy('createdAt', 'desc')
+  let query = db.collection('timer-entries').where('userId', '==', request.user.uid);
+
+  if(request.query.workspace) {
+    console.log('getTimerEntries: filter by workspace ID', request.query.workspace);
+    query = query.where('workspaceId', '==', request.query.workspace);
+  }
+  if(request.query.project) {
+    console.log('getTimerEntries: filter by project ID', request.query.project);
+    query = query.where('projectId', '==', request.query.project);
+  }
+  query.orderBy('createdAt', 'desc')
   .limit(limit)
   .get()
   .then(data => {
@@ -62,5 +70,9 @@ exports.getTimerEntries = (request, response) => {
       entryData.push(data);
     })
     return response.json(entryData);
+  })
+  .catch(error => {
+    console.error(error);
+    return response.status(500).json(error);
   });
 };
