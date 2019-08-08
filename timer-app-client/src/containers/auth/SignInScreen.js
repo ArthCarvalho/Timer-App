@@ -1,0 +1,99 @@
+import React from 'react';
+import Avatar from '@material-ui/core/Avatar';
+import Button from '@material-ui/core/Button';
+import FormControl from '@material-ui/core/FormControl';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
+import Input from '@material-ui/core/Input';
+import InputLabel from '@material-ui/core/InputLabel';
+import LockOutlinedIcon from '@material-ui/icons/LockOutlined';
+import Paper from '@material-ui/core/Paper';
+import Typography from '@material-ui/core/Typography';
+import withStyles from '@material-ui/core/styles/withStyles';
+import Fade from '@material-ui/core/Fade';
+
+const styles = theme => ({
+  main: {
+    width: 'auto',
+    display: 'block',
+    marginLeft: theme.spacing.unit *3,
+    marginRight: theme.spacing.unit *3,
+    [theme.breakpoints.up(400 + theme.spacing.unit * 3 * 2)]: {
+      width: 400,
+      marginLeft: 'auto',
+      marginRight: 'auto',
+    },
+    backgroundColor: '#E9573F',
+  },
+  paper: {
+    marginTop: theme.spacing.unit * 8,
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    padding: `${theme.spacing.unit *2}px ${theme.spacing.unit *3}px ${theme.spacing.unit *3}px`,
+  },
+  avatar: {
+    margin: theme.spacing.unit,
+    backgroundColor: theme.palette.secondary.main,
+    width: 60,
+    height: 60,
+  },
+  form: {
+    width: '100%',
+    marginTop: theme.spacing.unit,
+  },
+  submit: {
+    marginTop: theme.spacing.unit * 3,
+  },
+});
+
+function SignInScreen(props) {
+  const { classes } = props;
+
+  return (
+    <main className={classes.main}>
+      <Paper className={classes.paper}>
+        <Fade in>
+          <Avatar className={classes.avatar}><LockOutlinedIcon fontSize="large"/></Avatar>
+        </Fade>
+        <Fade in>
+          <Typography component="h1" variant="h5">Sign In</Typography>
+        </Fade>
+        <form className={classes.form}>
+          <Fade in style={{transitionDelay: '50ms'}}>
+            <FormControl margin="normal" required fullWidth>
+              <InputLabel htmlFor="email">Email Address</InputLabel>
+              <Input id="email" name="email" autoComplete="email" autoFocus />
+            </FormControl>
+          </Fade>
+          <Fade in style={{transitionDelay: '100ms'}}>
+            <FormControl margin="normal" required fullWidth>
+              <InputLabel htmlFor="password">Password</InputLabel>
+              <Input id="password" name="password" autoComplete="password" />
+            </FormControl>
+          </Fade>
+          <Fade in style={{transitionDelay: '150ms'}}>
+            <FormControlLabel
+              control={<Checkbox value="remember" color="primary" />}
+              label="Remember me"
+            />
+          </Fade>
+          <Fade in style={{transitionDelay: '200ms'}}>
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              color="primary"
+              className={classes.submit}
+            >
+              Sign in
+            </Button>
+          </Fade>
+        </form>
+      </Paper>
+      
+    </main>
+  );
+};
+
+export default withStyles(styles)(SignInScreen);
