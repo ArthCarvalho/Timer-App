@@ -4,7 +4,6 @@ import React, { Component, Fragment } from "react";
 import Typography from "@material-ui/core/Typography";
 import Avatar from "@material-ui/core/Avatar";
 import withStyles from "@material-ui/core/styles/withStyles";
-import Paper from "@material-ui/core/Paper";
 import Divider from "@material-ui/core/Divider";
 import Checkbox from "@material-ui/core/Checkbox";
 import FormControlLabel from "@material-ui/core/FormControlLabel";
@@ -14,7 +13,9 @@ import TextField from "@material-ui/core/TextField";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import InputLabel from "@material-ui/core/InputLabel";
-import { green } from '@material-ui/core/colors';
+import ClickAwayListener from "@material-ui/core/ClickAwayListener";
+import MenuList from "@material-ui/core/MenuList";
+import Menu from "@material-ui/core/Menu";
 
 // Icons
 import SettingsIcon from "@material-ui/icons/Settings";
@@ -47,18 +48,12 @@ const styles = theme => ({
   },
   nameEmail: {
     marginLeft: 20,
-    width: "80%",
-    '& div': { marginBottom: 8}, //Breaks the correct size of the Select
-  },
-  nameEmailPapers: {
-    paddingLeft: "20px",
-    paddingTop: "20px",
-    paddingBottom: "20px",
-    marginBottom: "25px"
+    width: "80%"
   },
   optionsCheckboxes: {
     display: "flex",
-    flexDirection: "column"
+    flexDirection: "column",
+    marginTop: "20px"
   },
   timerPageOptions: {
     marginTop: "20px",
@@ -80,26 +75,29 @@ const styles = theme => ({
   bottomTimeOptions: {
     display: "flex",
     justifyContent: "space-between"
-  },
-
-  optionPapers: {
-    paddingLeft: "10px",
-    paddingTop: "10px",
-    paddingBottom: "10px",
-    paddingRight: "200px"
   }
 });
 
-const ConfirmationButton = withStyles( theme => ({
-  root: { 
-    color: 'white',
-    textTransform:'none',
+const ConfirmationButton = withStyles(theme => ({
+  root: {
+    color: "white",
+    textTransform: "none",
     backgroundColor: "#4bc800",
-    '&:hover': {
-      backgroundColor: "#47be00",
-    },
-  },
+    "&:hover": {
+      backgroundColor: "#47be00"
+    }
+  }
 }))(Button);
+
+const BroadTextField = withStyles(theme => ({
+  root: { marginBottom: "20px" }
+}))(TextField);
+
+const AdjustedOutlinedInput = withStyles(theme => ({
+  root: {
+    width: "250px"
+  }
+}))(OutlinedInput);
 
 const UserProfileScreen = props => {
   const { classes } = props;
@@ -107,6 +105,18 @@ const UserProfileScreen = props => {
     age: "",
     name: "hai"
   });
+  const [anchorEl, setAnchorEl] = React.useState(null);
+
+  const [open, setOpen] = React.useState(false);
+
+  const handleClick = event => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  }
+
 
   const [state, setState] = React.useState({
     checkedA: false,
@@ -128,10 +138,22 @@ const UserProfileScreen = props => {
             My Profile
           </Typography>
           <div className={classes.topIcons}>
-            <Button>
-              <SettingsIcon />
-              <ArrowDropDownIcon />
-            </Button>
+              <Button onClick={handleClick}>
+                <SettingsIcon />
+                <ArrowDropDownIcon />
+              </Button>
+                <Menu
+                  id='settings-menu'
+                  anchorEl={anchorEl}
+                  keepMounted
+                  open={Boolean(anchorEl)}
+                  onClose={handleClose}
+                >
+                    <MenuItem>{"None"}</MenuItem>
+                    <MenuItem>{"None"}</MenuItem>
+                    <MenuItem>{"None"}</MenuItem>
+                    <MenuItem>{"None"}</MenuItem>
+                </Menu>
             <ConfirmationButton
               className={classes.confirmationButton}
               variant="contained"
@@ -153,42 +175,33 @@ const UserProfileScreen = props => {
           <div className={classes.nameEmail}>
             <div>
               <Typography variant="body1">Your name</Typography>
-              {/* <Paper className={classes.nameEmailPapers}> */}
-              <TextField
+              <BroadTextField
                 fullWidth
                 variant="outlined"
                 placeholder={`Arthur Carvalho`}
               />
-              {/* </Paper> */}
             </div>
             <div>
               <Typography variant="body1">Email</Typography>
-              {/* <Paper className={classes.nameEmailPapers}> */}
-              {/* <Typography variant="body1"> */}
-              <TextField
+              <BroadTextField
                 fullWidth
                 variant="outlined"
                 placeholder={`carvalho.yoa.arthur@gmail.com`}
               />
-              {/* </Typography> */}
-              {/* </Paper> */}
             </div>
             <div>
               <Typography variant="body1">Country</Typography>
-              
-              <FormControl fullWidth variant="outlined" className={classes.formControl}>
-                
-                <InputLabel htmlFor="outlined-age-simple">
-                  {`Brazil`}
-                </InputLabel>
+
+              <FormControl fullWidth variant="outlined">
+                <InputLabel htmlFor="outlined-country">{`Brazil`}</InputLabel>
                 <Select
                   value={values.age}
                   onChange={handleChange}
                   input={
                     <OutlinedInput
-                      labelWidth='100'
-                      name="age"
-                      id="outlined-age-simple"
+                      fullWidth
+                      name="country"
+                      id="outlined-country"
                     />
                   }
                 >
@@ -200,7 +213,6 @@ const UserProfileScreen = props => {
                   <MenuItem value={30}>Canada</MenuItem>
                 </Select>
               </FormControl>
-            
             </div>
             <div className={classes.optionsCheckboxes}>
               <FormControlLabel
@@ -268,39 +280,119 @@ const UserProfileScreen = props => {
               <div className={classes.topTimeOptions}>
                 <div>
                   <Typography variant="subtitle2">{`Time Zone`}</Typography>
-                  <Paper className={classes.optionPapers}>
-                    <Typography variant="body1">{`America/São Paulo(UTC -3)`}</Typography>
-                  </Paper>
+                  <FormControl variant="outlined">
+                    <InputLabel htmlFor="outlined-timezone">
+                      {`America/São Paulo(UTC -3)`}
+                    </InputLabel>
+                    <Select
+                      value={values.age}
+                      onChange={handleChange}
+                      input={
+                        <AdjustedOutlinedInput
+                          name="timezone"
+                          id="outlined-timezone"
+                        />
+                      }
+                    >
+                      <MenuItem value={10}>None</MenuItem>
+                      <MenuItem value={20}>None</MenuItem>
+                      <MenuItem value={30}>None</MenuItem>
+                    </Select>
+                  </FormControl>
                 </div>
                 <div>
                   <Typography variant="subtitle2">
                     {`Duration display format`}
                   </Typography>
-                  <Paper className={classes.optionPapers}>
-                    <Typography variant="body1">{`Classic (47:06 min)`}</Typography>
-                  </Paper>
+                  <FormControl variant="outlined">
+                    <InputLabel htmlFor="outlined-duration-display-format">
+                      {`Classic (47:06 min)`}
+                    </InputLabel>
+                    <Select
+                      value={values.age}
+                      onChange={handleChange}
+                      input={
+                        <AdjustedOutlinedInput
+                          name="duration-display-format"
+                          id="outlined-duration-display-format"
+                        />
+                      }
+                    >
+                      <MenuItem value={10}>None</MenuItem>
+                      <MenuItem value={20}>None</MenuItem>
+                      <MenuItem value={30}>None</MenuItem>
+                    </Select>
+                  </FormControl>
                 </div>
               </div>
               <div className={classes.bottomTimeOptions}>
                 <div>
                   <Typography variant="subtitle2">{`Date format`}</Typography>
-                  <Paper className={classes.optionPapers}>
-                    <Typography variant="body1">{`DD-MM-YYYY`}</Typography>
-                  </Paper>
+                  <FormControl variant="outlined">
+                    <InputLabel htmlFor="outlined-date-format">
+                      {`DD-MM-YYYY`}
+                    </InputLabel>
+                    <Select
+                      value={values.age}
+                      onChange={handleChange}
+                      input={
+                        <AdjustedOutlinedInput
+                          name="date-format"
+                          id="outlined-date-format"
+                        />
+                      }
+                    >
+                      <MenuItem value={10}>None</MenuItem>
+                      <MenuItem value={20}>None</MenuItem>
+                      <MenuItem value={30}>None</MenuItem>
+                    </Select>
+                  </FormControl>
                 </div>
                 <div>
                   <Typography variant="subtitle2">{`Time format`}</Typography>
-                  <Paper className={classes.optionPapers}>
-                    <Typography variant="body1">{`12-hour`}</Typography>
-                  </Paper>
+                  <FormControl variant="outlined">
+                    <InputLabel htmlFor="outlined-time-format">
+                      {`12-hour`}
+                    </InputLabel>
+                    <Select
+                      value={values.age}
+                      onChange={handleChange}
+                      input={
+                        <AdjustedOutlinedInput
+                          name="time-format"
+                          id="outlined-time-format"
+                        />
+                      }
+                    >
+                      <MenuItem value={10}>None</MenuItem>
+                      <MenuItem value={20}>None</MenuItem>
+                      <MenuItem value={30}>None</MenuItem>
+                    </Select>
+                  </FormControl>
                 </div>
                 <div>
                   <Typography variant="subtitle2">
                     {`First day of the Week`}
                   </Typography>
-                  <Paper className={classes.optionPapers}>
-                    <Typography variant="body1">{`Monday`}</Typography>
-                  </Paper>
+                  <FormControl variant="outlined">
+                    <InputLabel htmlFor="first-day-of-the-week">
+                      {`Monday`}
+                    </InputLabel>
+                    <Select
+                      value={values.age}
+                      onChange={handleChange}
+                      input={
+                        <AdjustedOutlinedInput
+                          name="first-day-of-the-week"
+                          id="outlined-first-day-of-the-week"
+                        />
+                      }
+                    >
+                      <MenuItem value={10}>None</MenuItem>
+                      <MenuItem value={20}>None</MenuItem>
+                      <MenuItem value={30}>None</MenuItem>
+                    </Select>
+                  </FormControl>
                 </div>
               </div>
             </div>
