@@ -3,9 +3,9 @@ import React from 'react';
 const FirebaseContext = React.createContext(null);
 
 export const withFirebase = Component => props => (
-  <FirebaseContext.Constumer>
+  <FirebaseContext.Consumer>
     { firebase => <Component {...props} firebase={firebase}/>}
-  </FirebaseContext.Constumer>
+  </FirebaseContext.Consumer>
 );
 
 export default FirebaseContext;

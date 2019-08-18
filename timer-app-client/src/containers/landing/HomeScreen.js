@@ -11,6 +11,8 @@ import { withStyles } from '@material-ui/core/styles';
 import { Link as RouterLink } from 'react-router-dom';
 import Link from '@material-ui/core/Link';
 
+import { withFirebase } from '../../components/Firebase';
+import { withAuthentication } from '../../components/Session';
 
 const styles = theme => ({
   '@global': {
@@ -96,7 +98,7 @@ const footerLinks = [
 ];
 
 function HomeScreen(props) {
-  const { classes } = props;
+  const { classes, authUser } = props;
 
   return(
     <React.Fragment>
@@ -107,10 +109,10 @@ function HomeScreen(props) {
           </Typography>
           <Button>Home</Button>
           <Button>About</Button>
-          <Button>Sign out</Button>
-          <Button color="primary" variant="outlined" component={RouterLink} to="/timer">Open timer</Button>
-          <Button color="primary" variant="outlined" component={RouterLink} to="/signin">Sign in</Button>
-          <Button color="primary" variant="outlined" component={RouterLink} to="/signup">Create account</Button>
+          {authUser && <Button onClick={props.firebase.userLogout}>Sign out</Button>} 
+          {authUser && <Button color="primary" variant="outlined" component={RouterLink} to="/timer">Open timer</Button>}
+          {!authUser && <Button color="primary" variant="outlined" component={RouterLink} to="/signin">Sign in</Button>}
+          {!authUser && <Button color="primary" variant="outlined" component={RouterLink} to="/signup">Create account</Button>}
         </Toolbar>
       </AppBar>
       <main className={classes.layout}>
@@ -123,9 +125,11 @@ function HomeScreen(props) {
             can avoid feeling like trash as you usually do for failing to train everyday,
             also you can progress and git gud.
           </Typography>
-          <div className={classes.presentationButtons}>
-            <Fab variant="extended" color="secondary" fullWidth component={RouterLink} to="/signup">Create an account<ArrowForwardIosIcon /></Fab>
-          </div>
+          {!authUser &&
+            <div className={classes.presentationButtons}>
+              <Fab variant="extended" color="secondary" fullWidth component={RouterLink} to="/signup">Create an account<ArrowForwardIosIcon /></Fab>
+            </div>
+          }
         </div>
         <div className={classes.heroUnit}>
           <div className={classes.presentation}>
@@ -189,4 +193,4 @@ HomeScreen.propTypes = {
   classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles)(HomeScreen);
+export default withFirebase(withAuthentication(withStyles(styles)(HomeScreen)));

@@ -4,18 +4,32 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import MuiThemeProvider from '@material-ui/core/styles/MuiThemeProvider';
 import muiTheme from './theme/muiTheme';
 
-import firebase from 'firebase/app';
-
 import HomeScreen from './containers/landing/HomeScreen';
 import Dashboard from './components/Dashboard';
 import SignInScreen from './containers/auth/SignInScreen';
 import SignUpScreen from './containers/auth/SignUpScreen';
+
+import { withFirebase } from './components/Firebase';
+import { AuthUserContext } from './components/Session';
 
 class App extends Component {
 
   constructor(props){
     super(props);
 
+    this.state = {
+      authUser: null
+    };
+  }
+
+  componentDidMount() {
+    this.authListener = this.props.firebase.auth.onAuthStateChanged( authUser => {
+      authUser ? this.setState({ authUser }) : this.setState({ authUser: null });
+    });
+  }
+
+  componentWillUnmount() {
+    this.authListener();
   }
 
   render() {
@@ -23,6 +37,7 @@ class App extends Component {
       <div>
         <CssBaseline />
         <MuiThemeProvider theme={muiTheme}>
+          <AuthUserContext.Provider value={this.state.authUser}>
           <BrowserRouter>
             <Switch>
               <Route path="/timer" component={Dashboard}/>
@@ -34,11 +49,11 @@ class App extends Component {
               />
             </Switch>
           </BrowserRouter>
+          </AuthUserContext.Provider>
         </MuiThemeProvider>
       </div>
     );
   }
-  
 }
 
-export default App;
+export default withFirebase(App);

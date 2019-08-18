@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from 'react';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
 import FormControl from '@material-ui/core/FormControl';
@@ -11,6 +11,9 @@ import Paper from '@material-ui/core/Paper';
 import Typography from '@material-ui/core/Typography';
 import withStyles from '@material-ui/core/styles/withStyles';
 import Fade from '@material-ui/core/Fade';
+
+import {withFirebase} from '../../components/Firebase';
+import { verifyPassword, verifyEmail } from '../../utils/validators';
 
 const styles = theme => ({
   main: {
@@ -47,53 +50,112 @@ const styles = theme => ({
   },
 });
 
-function SignInScreen(props) {
-  const { classes } = props;
+class SignInScreen extends Component {
+  constructor(props) {
+    super(props);
 
-  return (
-    <main className={classes.main}>
-      <Paper className={classes.paper}>
-        <Fade in>
-          <Avatar className={classes.avatar}><LockOutlinedIcon fontSize="large"/></Avatar>
-        </Fade>
-        <Fade in>
-          <Typography component="h1" variant="h5">Sign In</Typography>
-        </Fade>
-        <form className={classes.form}>
-          <Fade in style={{transitionDelay: '50ms'}}>
-            <FormControl margin="normal" required fullWidth>
-              <InputLabel htmlFor="email">Email Address</InputLabel>
-              <Input id="email" name="email" autoComplete="email" autoFocus />
-            </FormControl>
+    this.state = {
+      email: '',
+      password: '',
+      confirmPassword: '',
+      errors: {},
+      loading: false
+    };
+  };
+
+  handleSubmit = (event) => {
+    event.preventDefault();
+    const fb = this.props.firebase;
+    let errors = {};
+
+    this.setState({ loading: true });
+
+    // Check email
+    let error = verifyEmail(this.state.email);
+    if(error) {
+      errors.email = error;
+    }
+    // Check password
+    error = verifyPassword(this.state.password);
+    if(error) {
+      errors.password = error;
+    }
+
+    if(Object.keys(errors).length) {
+      this.setState({ errors, loading: false });
+      return;
+    }
+
+    fb.userLogin({ email: this.state.email, password: this.state.password })
+    .then( () => {
+      this.setState({ loading: false });
+      this.props.history.push('/');
+    })
+    .catch( error => {
+      console.error(error);
+      this.setState({ errors: { ...this.state.errors, login: 'Email not found or wrong password.'}, loading: false });
+    });
+  };
+
+  handleChange = (event) => {
+    this.setState({
+      [event.target.name]: event.target.value
+    });
+  }
+
+  clearErrors() {
+    this.setState({ errors: undefined });
+  }
+
+  render() {
+    const { classes } = this.props;
+    const { loading } = this.state;
+    return (
+      <main className={classes.main}>
+        <Paper className={classes.paper}>
+          <Fade in>
+            <Avatar className={classes.avatar}><LockOutlinedIcon fontSize="large"/></Avatar>
           </Fade>
-          <Fade in style={{transitionDelay: '100ms'}}>
-            <FormControl margin="normal" required fullWidth>
-              <InputLabel htmlFor="password">Password</InputLabel>
-              <Input id="password" name="password" autoComplete="password" />
-            </FormControl>
+          <Fade in>
+            <Typography component="h1" variant="h5">Sign In</Typography>
           </Fade>
-          <Fade in style={{transitionDelay: '150ms'}}>
-            <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
-              label="Remember me"
-            />
-          </Fade>
-          <Fade in style={{transitionDelay: '200ms'}}>
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              color="primary"
-              className={classes.submit}
-            >
-              Sign in
-            </Button>
-          </Fade>
-        </form>
-      </Paper>
-      
-    </main>
-  );
+          <form className={classes.form} onSubmit={this.handleSubmit}>
+            <Fade in style={{transitionDelay: '50ms'}}>
+              <FormControl margin="normal" required fullWidth>
+                <InputLabel htmlFor="email">Email Address</InputLabel>
+                <Input id="email" name="email" autoComplete="email" autoFocus onChange={this.handleChange} />
+              </FormControl>
+            </Fade>
+            <Fade in style={{transitionDelay: '100ms'}}>
+              <FormControl margin="normal" required fullWidth>
+                <InputLabel htmlFor="password">Password</InputLabel>
+                <Input id="password" name="password" autoComplete="password" onChange={this.handleChange} />
+              </FormControl>
+            </Fade>
+            <Fade in style={{transitionDelay: '150ms'}}>
+              <FormControlLabel
+                control={<Checkbox value="remember" color="primary" />}
+                label="Remember me"
+              />
+            </Fade>
+            <Fade in style={{transitionDelay: '200ms'}}>
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                color="primary"
+                disabled={loading}
+                className={classes.submit}
+              >
+                Sign in
+              </Button>
+            </Fade>
+          </form>
+        </Paper>
+        
+      </main>
+    );
+  };
 };
 
-export default withStyles(styles)(SignInScreen);
+export default  withFirebase(withStyles(styles)(SignInScreen));
