@@ -121,7 +121,7 @@ class SignUpScreen extends Component {
     fb.userCreate({email: this.state.email, password: this.state.password, displayName: this.state.displayName})
     .then( () => {
       this.setState({ loading: false });
-      this.props.history.push('/');
+      this.props.history.push('/timer/app');
     })
     .catch( error => {
       console.error(error);

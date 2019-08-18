@@ -24,7 +24,10 @@ class App extends Component {
 
   componentDidMount() {
     this.authListener = this.props.firebase.auth.onAuthStateChanged( authUser => {
+      console.log('Auth Status Changed:');
+      console.log(authUser);
       authUser ? this.setState({ authUser }) : this.setState({ authUser: null });
+      
     });
   }
 

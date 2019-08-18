@@ -89,7 +89,7 @@ class SignInScreen extends Component {
     fb.userLogin({ email: this.state.email, password: this.state.password })
     .then( () => {
       this.setState({ loading: false });
-      this.props.history.push('/');
+      this.props.history.push('/timer/app');
     })
     .catch( error => {
       console.error(error);
