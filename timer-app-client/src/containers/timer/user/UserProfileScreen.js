@@ -23,6 +23,8 @@ import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import DoneIcon from "@material-ui/icons/Done";
 import { OutlinedInput } from "@material-ui/core";
 
+import { withAuthentication } from '../../../components/Session';
+
 const styles = theme => ({
   headerItems: {
     display: "flex",
@@ -100,10 +102,9 @@ const AdjustedOutlinedInput = withStyles(theme => ({
 }))(OutlinedInput);
 
 const UserProfileScreen = props => {
-  const { classes } = props;
+  const { classes, authUser } = props;
   const [values, setValues] = React.useState({
-    age: "",
-    name: "hai"
+    displayName: '',
   });
   const [anchorEl, setAnchorEl] = React.useState(null);
 
@@ -130,9 +131,15 @@ const UserProfileScreen = props => {
     setState({ ...state, [name]: event.target.checked });
   };
 
+  /*
+  React.useEffect(() => {
+    console.log(authUser);
+  }, []);
+  */
+ 
   return (
     <Fragment>
-      <form className={classes.root} autocomplete="off">
+      <form className={classes.root} autoComplete="off">
         <div className={classes.headerItems}>
           <Typography variant="h4" className={classes.topText}>
             My Profile
@@ -167,8 +174,8 @@ const UserProfileScreen = props => {
         <div className={classes.basicData}>
           <div>
             <Avatar
-              alt={`Username`}
-              src="https://firebasestorage.googleapis.com/v0/b/timer-app-project.appspot.com/o/no-img.png?alt=media&token=74ca4d0e-26e1-4b1b-a5d5-f70af6028e85"
+              alt={authUser && authUser.displayName}
+              src={authUser && authUser.photoURL}
               className={classes.bigAvatar}
             />
           </div>
@@ -178,7 +185,7 @@ const UserProfileScreen = props => {
               <BroadTextField
                 fullWidth
                 variant="outlined"
-                placeholder={`Arthur Carvalho`}
+                placeholder={authUser && authUser.displayName}
               />
             </div>
             <div>
@@ -186,7 +193,7 @@ const UserProfileScreen = props => {
               <BroadTextField
                 fullWidth
                 variant="outlined"
-                placeholder={`carvalho.yoa.arthur@gmail.com`}
+                placeholder={authUser && authUser.email}
               />
             </div>
             <div>
@@ -404,4 +411,4 @@ const UserProfileScreen = props => {
   );
 };
 
-export default withStyles(styles)(UserProfileScreen);
+export default withAuthentication(withStyles(styles)(UserProfileScreen));

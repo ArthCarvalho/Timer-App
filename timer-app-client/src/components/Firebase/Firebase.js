@@ -18,12 +18,13 @@ class Firebase {
 
   userCreate = (data) => {
     return this.auth.createUserWithEmailAndPassword(data.email, data.password)
-    .then( data => {
+    .then( authdata => {
       let newUser = this.auth.currentUser;
       newUser.updateProfile({
         displayName: data.displayName,
         photoURL: `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/user-images%2Fno-img.png?alt=media`
       });
+      return authdata;
     });
   }
 

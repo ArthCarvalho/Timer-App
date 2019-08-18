@@ -46,7 +46,7 @@ import LocalOfferIcon from '@material-ui/icons/LocalOffer';
 import MonetizationOnIcon from '@material-ui/icons/MonetizationOn';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import NotificationsIcon from '@material-ui/icons/Notifications';
-
+import { AuthUserContext, withAuthentication } from './Session';
 
 const drawerWidth = 240;
 
@@ -146,7 +146,7 @@ class Dashboard extends React.Component {
 
   render () {
 
-    const {classes, match} = this.props;
+    const {classes, match, authUser} = this.props;
   
     return (
       <BrowserRouter>
@@ -200,7 +200,7 @@ class Dashboard extends React.Component {
                 this.anchorEl = node;
               }}
             >
-             <Avatar onClick={this.handleTogglePopper}>AC</Avatar>
+             <Avatar src={authUser && authUser.photoURL} onClick={this.handleTogglePopper}/>
             </IconButton>
             <Popper open={this.state.userPopperOpen} anchorEl={this.anchorEl} transition disablePortal>
               {({ TransitionProps, placement }) => (
@@ -246,7 +246,7 @@ class Dashboard extends React.Component {
               {subListItems}
             </List>
             <div>
-              <Typography variant="subtitle1">Arthur Carvalho</Typography>
+              <Typography variant="subtitle1">{authUser && authUser.displayName}</Typography>
               <Typography variant="body2">Workspace</Typography>
             </div>
             
@@ -282,4 +282,4 @@ Dashboard.propTypes = {
   classes: PropTypes.object.isRequired,
 };
 
-export default withStyles(styles) (Dashboard);
+export default withAuthentication(withStyles(styles) (Dashboard));

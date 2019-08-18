@@ -117,7 +117,8 @@ class SignUpScreen extends Component {
       this.setState({ errors, loading: false });
       return;
     }
-    
+    console.log('creating user')
+    console.log(this.state);
     fb.userCreate({email: this.state.email, password: this.state.password, displayName: this.state.displayName})
     .then( () => {
       this.setState({ loading: false });
