@@ -1,4 +1,6 @@
-import React, { Component, Fragment } from "react";
+import React, { Fragment, useContext } from "react";
+
+import moment from 'moment';
 
 // MUI
 import Typography from "@material-ui/core/Typography";
@@ -12,6 +14,7 @@ import Button from "@material-ui/core/Button";
 import TextField from "@material-ui/core/TextField";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
+import Input from "@material-ui/core/Input";
 import InputLabel from "@material-ui/core/InputLabel";
 import ClickAwayListener from "@material-ui/core/ClickAwayListener";
 import MenuList from "@material-ui/core/MenuList";
@@ -23,7 +26,8 @@ import ArrowDropDownIcon from "@material-ui/icons/ArrowDropDown";
 import DoneIcon from "@material-ui/icons/Done";
 import { OutlinedInput } from "@material-ui/core";
 
-import { withAuthentication } from '../../../components/Session';
+import { AuthUserContext, withAuthentication } from '../../../components/Session';
+import { FirebaseContext } from '../../../components/Firebase';
 
 const styles = theme => ({
   headerItems: {
@@ -102,10 +106,20 @@ const AdjustedOutlinedInput = withStyles(theme => ({
 }))(OutlinedInput);
 
 const UserProfileScreen = props => {
-  const { classes, authUser } = props;
+  const { classes } = props;
+
+  const authContext = useContext(AuthUserContext);
+  const firebaseContext = useContext(FirebaseContext);
+
+  const [profileChanged, setProfileChanged] = React.useState(false);
+
   const [values, setValues] = React.useState({
     displayName: '',
+    photoURL: '',
+    email: '',
+    country: ''
   });
+
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   const [open, setOpen] = React.useState(false);
@@ -131,12 +145,33 @@ const UserProfileScreen = props => {
     setState({ ...state, [name]: event.target.checked });
   };
 
-  /*
+  const handleChangeText = ( name, value )=> {
+    setValues({ ...values, [name]: value });
+  }
+
   React.useEffect(() => {
-    console.log(authUser);
-  }, []);
-  */
- 
+    if(!authContext) return;
+    setValues({
+      displayName: authContext.displayName,
+      photoURL: authContext.photoURL,
+      email: authContext.email
+    });
+  }, [authContext]);
+
+  React.useEffect(() => {
+    if(!authContext) return;
+    let changes = 0;
+    if(values.displayName !== authContext.displayName) changes++; 
+    if(values.email !== authContext.email) changes++; 
+    if(values.photoURL !== authContext.photoURL) changes++; 
+    if(changes) {
+      setProfileChanged(true);
+      console.log('profile modified', changes);
+    } else {
+      setProfileChanged(false);
+    }
+  }, [values]);
+
   return (
     <Fragment>
       <form className={classes.root} autoComplete="off">
@@ -165,19 +200,40 @@ const UserProfileScreen = props => {
               className={classes.confirmationButton}
               variant="contained"
               color="primary"
+              disabled={!profileChanged}
             >
               <DoneIcon />
-              Done
+              Save Changes
             </ConfirmationButton>
           </div>
         </div>
         <div className={classes.basicData}>
           <div>
             <Avatar
-              alt={authUser && authUser.displayName}
-              src={authUser && authUser.photoURL}
+              alt={values.displayName}
+              src={values.photoURL}
               className={classes.bigAvatar}
             />
+            <Input type="file" id="imageInput" onChange={(e) => {
+              // Handle image changes
+              const date = moment().format("YYYYMMDD-HHMMSS");
+              const image = e.target.files[0];
+              const store = firebaseContext.storage.ref();
+              const imageExtension = `.${e.target.files[0].name.split('.').pop()}`
+              const imageName = `user-images/image-${authContext.uid}-${date}${imageExtension}`;
+              const userPhoto = store.child(imageName).put(image)
+              .then( snapshot => {
+                firebaseContext.updateProfilePicture(snapshot.metadata.name)
+                .then((fullURL) => {
+                  const oldImage = values.photoURL.split('/o/').pop().split('?')[0].replace('%2F','/');
+                  store.child(oldImage).delete();
+                  setValues({...values, photoURL: fullURL});
+                });
+                
+              });
+              
+
+            }}></Input>
           </div>
           <div className={classes.nameEmail}>
             <div>
@@ -185,7 +241,8 @@ const UserProfileScreen = props => {
               <BroadTextField
                 fullWidth
                 variant="outlined"
-                placeholder={authUser && authUser.displayName}
+                value={values.displayName}
+                onChange={(e) => setValues({...values, displayName: e.target.value})}
               />
             </div>
             <div>
@@ -193,7 +250,8 @@ const UserProfileScreen = props => {
               <BroadTextField
                 fullWidth
                 variant="outlined"
-                placeholder={authUser && authUser.email}
+                value={values.email}
+                onChange={(e) => setValues({...values, email: e.target.value})}
               />
             </div>
             <div>
@@ -202,7 +260,7 @@ const UserProfileScreen = props => {
               <FormControl fullWidth variant="outlined">
                 <InputLabel htmlFor="outlined-country">{`Brazil`}</InputLabel>
                 <Select
-                  value={values.age}
+                  value={values.country}
                   onChange={handleChange}
                   input={
                     <OutlinedInput
@@ -411,4 +469,4 @@ const UserProfileScreen = props => {
   );
 };
 
-export default withAuthentication(withStyles(styles)(UserProfileScreen));
+export default withStyles(styles)(UserProfileScreen);

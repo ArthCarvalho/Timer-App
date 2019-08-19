@@ -1,6 +1,7 @@
 import app from 'firebase/app';
 import 'firebase/auth';
 import 'firebase/database';
+import 'firebase/storage';
 
 import { config } from './config';
 
@@ -9,11 +10,22 @@ class Firebase {
     this.app = app.initializeApp(config);
     this.auth = this.app.auth();
     this.db = this.app.database();
+    this.storage = this.app.storage();
     this.user = {
       displayName: '',
       photoURL: '',
       cred: null
     };
+  }
+
+  updateProfilePicture = (name) => {
+    let fullURL = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/user-images%2F${name}?alt=media`;
+    return this.auth.currentUser.updateProfile({
+      photoURL: fullURL
+    })
+    .then(() => {
+      return fullURL;
+    });
   }
 
   userCreate = (data) => {
