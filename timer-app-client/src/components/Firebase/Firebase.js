@@ -18,6 +18,13 @@ class Firebase {
     };
   }
 
+  onProfileUpdated;
+
+  profileUpdated = (profileData) => {
+    if(!this.onProfileUpdated) return;
+    this.onProfileUpdated(profileData);
+  }
+
   updateProfilePicture = (name) => {
     let fullURL = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/user-images%2F${name}?alt=media`;
     return this.auth.currentUser.updateProfile({

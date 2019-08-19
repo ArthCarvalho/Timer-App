@@ -132,6 +132,41 @@ const UserProfileScreen = props => {
     setAnchorEl(null);
   }
 
+  const handleSaveChanges = (e) => {
+    e.preventDefault();
+    
+    if(!profileChanged) return;
+
+    firebaseContext.auth.currentUser.updateProfile({
+      displayName: values.displayName,
+      photoURL: values.photoURL
+    })
+    .then(() => {
+      //verify if there are changes to the email field
+      if(values.email !== authContext.email) {
+        return firebaseContext.currentUser.updateEmail(values.email);
+      }
+    })
+    .then(() => {
+      console.log('profile updated successfully.');
+
+      let changeData = {};
+
+      Object.assign(changeData, authContext);
+
+      changeData.displayName = values.displayName;
+      changeData.photoURL = values.photoURL;
+
+      firebaseContext.profileUpdated(changeData);
+    });
+
+    
+
+
+    // Reset profile status to not edited
+    setProfileChanged(false);
+  }
+
 
   const [state, setState] = React.useState({
     checkedA: false,
@@ -201,6 +236,7 @@ const UserProfileScreen = props => {
               variant="contained"
               color="primary"
               disabled={!profileChanged}
+              onClick={handleSaveChanges}
             >
               <DoneIcon />
               Save Changes
