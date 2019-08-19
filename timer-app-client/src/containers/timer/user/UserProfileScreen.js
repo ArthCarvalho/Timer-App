@@ -256,13 +256,16 @@ const UserProfileScreen = props => {
               const image = e.target.files[0];
               const store = firebaseContext.storage.ref();
               const imageExtension = `.${e.target.files[0].name.split('.').pop()}`
-              const imageName = `user-images/image-${authContext.uid}-${date}${imageExtension}`;
+              const imageName = `user-images/${authContext.uid}/${date}${imageExtension}`;
               const userPhoto = store.child(imageName).put(image)
               .then( snapshot => {
-                firebaseContext.updateProfilePicture(snapshot.metadata.name)
+                console.log('snapshot.name:',snapshot.metadata.fullPath);
+                firebaseContext.updateProfilePicture(snapshot.metadata.fullPath)
                 .then((fullURL) => {
-                  const oldImage = values.photoURL.split('/o/').pop().split('?')[0].replace('%2F','/');
-                  store.child(oldImage).delete();
+                  const oldImage = values.photoURL.split('/o/').pop().split('?')[0].replace(/%2F/g,'/');
+                  if(oldImage !== 'user-images/no-img.png'){
+                    store.child(oldImage).delete();
+                  }
                   setValues({...values, photoURL: fullURL});
                 });
                 

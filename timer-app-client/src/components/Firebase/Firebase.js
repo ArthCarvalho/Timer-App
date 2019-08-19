@@ -1,6 +1,6 @@
 import app from 'firebase/app';
 import 'firebase/auth';
-import 'firebase/database';
+import 'firebase/firestore';
 import 'firebase/storage';
 
 import { config } from './config';
@@ -9,7 +9,7 @@ class Firebase {
   constructor() {
     this.app = app.initializeApp(config);
     this.auth = this.app.auth();
-    this.db = this.app.database();
+    this.db = this.app.firestore();
     this.storage = this.app.storage();
     this.user = {
       displayName: '',
@@ -26,7 +26,8 @@ class Firebase {
   }
 
   updateProfilePicture = (name) => {
-    let fullURL = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/user-images%2F${name}?alt=media`;
+    let nameFixed = name.replace(/\//g,'%2F');
+    let fullURL = `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/${nameFixed}?alt=media`;
     return this.auth.currentUser.updateProfile({
       photoURL: fullURL
     })
@@ -42,6 +43,14 @@ class Firebase {
       newUser.updateProfile({
         displayName: data.displayName,
         photoURL: `https://firebasestorage.googleapis.com/v0/b/${config.storageBucket}/o/user-images%2Fno-img.png?alt=media`
+      })
+      .then(() => {
+        console.log('authdata:',authdata)
+        this.db.collection('users').doc(authdata.user.uid).set({
+          displayName: authdata.user.displayName,
+          photoURL: authdata.user.photoURL,
+          email: authdata.user.email
+        });
       });
       return authdata;
     });

@@ -32,7 +32,6 @@ class App extends Component {
       console.log('Auth Status Changed:');
       console.log(authUser);
       authUser ? this.setState({ authUser }) : this.setState({ authUser: null });
-      
     });
   }
 
